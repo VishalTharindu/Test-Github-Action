@@ -1,10 +1,11 @@
 name: e-commerce-deployment
 
 on:
-  workflow_run:
-    workflows: ["e-commerce-build"]
-    types:
-      - completed
+  push:
+    branches:
+      - dev
+      - release
+      - main
 
 jobs:
   deploy_dev:
@@ -20,7 +21,7 @@ jobs:
       run: |
         echo "Deploying to Dev Environment"
         # Add AWS CLI deployment commands here for Dev environment
-        
+
   deploy_uat:
     name: Deploy to UAT Environment
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/release' }}
