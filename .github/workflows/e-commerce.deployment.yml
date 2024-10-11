@@ -1,0 +1,37 @@
+name: e-commerce-deployment
+
+on:
+  workflow_run:
+    workflows: ["e-commerce-build"]
+    types:
+      - completed
+
+jobs:
+  deploy_uat:
+    name: Deploy to UAT Environment
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/release' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: UAT
+      url : 'http://uat.testapp.com'
+    
+    steps:
+    - name: Deploy to AWS UAT
+      run: |
+        echo "Deploying to UAT Environment"
+        # Add AWS CLI deployment commands here for UAT environment
+
+  deploy_prod:
+    name: Deploy to Production Environment
+    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main' }}
+    needs: [deploy_uat]
+    runs-on: ubuntu-latest
+    environment:
+      name: Production
+      url : 'http://prod.testapp.com'
+    
+    steps:
+    - name: Deploy to AWS Production
+      run: |
+        echo "Deploying to Production Environment"
+        # Add AWS CLI deployment commands here for Production environment
