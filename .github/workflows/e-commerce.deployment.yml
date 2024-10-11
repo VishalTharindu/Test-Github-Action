@@ -24,7 +24,8 @@ jobs:
 
   deploy_uat:
     name: Deploy to UAT Environment
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/release' }}
+    if: github.ref == 'refs/heads/release'
+    needs: [deploy_dev]
     runs-on: ubuntu-latest
     environment:
       name: UAT
@@ -38,8 +39,7 @@ jobs:
 
   deploy_prod:
     name: Deploy to Production Environment
-    if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/main' }}
-    needs: [deploy_uat]
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     environment:
       name: Production
