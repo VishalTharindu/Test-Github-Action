@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     environment:
       name: Devlpment
-      url : 'http://uat.testapp.com'
+      url : 'http://dev.testapp.com'
     
     steps:
     - name: Deploy to AWS Dev
