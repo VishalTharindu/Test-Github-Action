@@ -7,6 +7,18 @@ on:
       - completed
 
 jobs:
+  deploy_dev:
+    name: Deploy to Dev Environment
+    runs-on: ubuntu-latest
+    needs: unit_tests
+    if: github.ref == 'refs/heads/dev'
+    
+    steps:
+    - name: Deploy to AWS Dev
+      run: |
+        echo "Deploying to Dev Environment"
+        # Add AWS CLI deployment commands here for Dev environment
+        
   deploy_uat:
     name: Deploy to UAT Environment
     if: ${{ github.event.workflow_run.conclusion == 'success' && github.ref == 'refs/heads/release' }}
