@@ -9,9 +9,12 @@ on:
 jobs:
   deploy_dev:
     name: Deploy to Dev Environment
-    runs-on: ubuntu-latest
     needs: unit_tests
     if: github.ref == 'refs/heads/dev'
+    runs-on: ubuntu-latest
+    environment:
+      name: Devlpment
+      url : 'http://uat.testapp.com'
     
     steps:
     - name: Deploy to AWS Dev
