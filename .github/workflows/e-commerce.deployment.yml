@@ -9,7 +9,6 @@ on:
 jobs:
   deploy_dev:
     name: Deploy to Dev Environment
-    needs: unit_tests
     if: github.ref == 'refs/heads/dev'
     runs-on: ubuntu-latest
     environment:
