@@ -1,0 +1,35 @@
+name: Create Release with Version Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+    types:
+      - closed  # Trigger when the PR is merged into the main branch
+
+jobs:
+  validate_version:
+    uses: ./.github/workflows/e-commerce.version-validation.yml  # Reuse the version validation workflow
+    with:
+      branch_name: ${{ github.event.pull_request.head.ref }}
+
+  create_release:
+    needs: validate_version
+    if: github.event.pull_request.merged == true && startsWith(github.event.pull_request.head.ref, 'release/')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create Release Tag
+        run: |
+          git tag "v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
+
+      - name: Create GitHub Release
+        uses: actions/create-release@v1
+        with:
+          tag_name: "v${{ env.VERSION }}"
+          release_name: "Release v${{ env.VERSION }}"
+          draft: false
+          prerelease: false

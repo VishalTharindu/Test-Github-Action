@@ -1,0 +1,38 @@
+name: UAT CI/CD with Version Validation
+
+on:
+  pull_request:
+    branches:
+      - 'release/**'  # Match dynamic semantic versioning release branches like 'release/v1.0.0'
+
+jobs:
+  validate_version:
+    uses: ./.github/workflows/e-commerce.version-validation.yml  # Reuse the version validation workflow
+    with:
+      branch_name: ${{ github.ref_name }}
+
+  build:
+    needs: validate_version
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+        # See supported Node.js release schedule at https://nodejs.org/en/about/releases/
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+    - run: npm ci
+    - run: npm run build --if-present
+
+  deploy_uat:
+    needs: build
+    runs-on: ubuntu-latest
+    if: success()
+    steps:
+      - name: Deploy to UAT Environment
+        run: echo "Deploying to the UAT environment for branch ${{ github.ref_name }}..."

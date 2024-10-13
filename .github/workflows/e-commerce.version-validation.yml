@@ -1,0 +1,40 @@
+name: Version Validation
+
+on:
+  workflow_call:
+    inputs:
+      branch_name:
+        required: true
+        type: string
+    secrets: inherit
+
+jobs:
+  validate_version:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Validate branch name format
+        id: validate_branch
+        run: |
+          BRANCH_NAME="${{ inputs.branch_name }}"
+          if [[ ! $BRANCH_NAME =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Error: Branch name does not match semantic versioning pattern (release/vX.Y.Z)."
+            exit 1
+          fi
+          VERSION=$(echo $BRANCH_NAME | sed 's/release\///')
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Compare with latest tag
+        run: |
+          LATEST_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
+          if [ -z "$LATEST_TAG" ]; then
+            echo "No previous tags found, proceeding with version ${{ env.VERSION }}."
+          else
+            echo "Latest tag found: $LATEST_TAG"
+            if [[ "$(printf '%s\n' "$LATEST_TAG" "${{ env.VERSION }}" | sort -V | head -n1)" != "$LATEST_TAG" ]]; then
+              echo "Error: Version ${{ env.VERSION }} is not newer than the latest tag $LATEST_TAG."
+              exit 1
+            fi
+          fi
